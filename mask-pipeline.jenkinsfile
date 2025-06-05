@@ -67,7 +67,7 @@ pipeline {
         stage('Run Dummy Tests if Changes Detected') {
             when {
                 expression {
-                    return fileExists('diff.txt') && readFile('diff.txt').contains("Differences Found")
+                    return fileExists('diff.txt') && readFile('diff.txt').contains("Unexpected Column(s):")
                 }
             }
             steps {
