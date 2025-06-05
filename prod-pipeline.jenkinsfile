@@ -4,7 +4,7 @@ pipeline {
     environment {
         REPO_URL = 'https://github.com/nick-mathison/my-database-changes.git'
         DCT_CLI = '/root/dct-toolkit'
-        LIQUIBASE_CLI = 'liquibase'
+        LB_CLI = 'liquibase'
         DB_URL = 'jdbc:postgresql://10.160.1.29:5432/delphixdb'
         DB_USER = 'delphix'
         DB_PASS = 'delphix'
@@ -22,7 +22,7 @@ pipeline {
         stage('Liquibase Update') {
             steps {
                 sh """
-                ${LIQUIBASE_CLI} \
+                ${LB_CLI} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
                   --changeLogFile=${CHANGE_FILE} \
@@ -54,7 +54,7 @@ pipeline {
                     } else {
                         echo "Sanity tests failed, performing Liquibase rollback..."
                         sh """
-                        ${LIQUIBASE_CLI} \
+                        ${LB_CLI} \
                           --url=${DB_URL} \
                           --username=${DB_USER} --password=${DB_PASS} \
                           --changeLogFile=${CHANGE_FILE} \

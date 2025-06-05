@@ -4,7 +4,7 @@ pipeline {
     environment {
         REPO_URL = 'https://github.com/nick-mathison/my-database-changes.git'
         DCT_CLI = '/root/dct-toolkit'
-        LIQUIBASE_CLI = 'liquibase'
+        LB_CLI = 'liquibase'
         DB_URL = 'jdbc:postgresql://10.160.1.74:5444/delphixdb'
         DB_USER = 'delphix'
         DB_PASS = 'delphix'
@@ -31,7 +31,7 @@ pipeline {
         stage('Create Liquibase Snapshot') {
             steps {
                 sh """
-                ${LIQUIBASE_CLI} \
+                ${LB_CLI} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
                   snapshot --snapshot-format=JSON --output-file=${SNAPSHOT_REF}
@@ -42,7 +42,7 @@ pipeline {
         stage('Liquibase Update') {
             steps {
                 sh """
-                ${LIQUIBASE_CLI} \
+                ${LB_CLI} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
                   --changeLogFile=${CHANGE_FILE} \
@@ -54,7 +54,7 @@ pipeline {
         stage('Diff Snapshot vs Current DB') {
             steps {
                 sh """
-                ${LIQUIBASE_CLI} \
+                ${LB_CLI} \
                   --reference-url="offline:postgres?snapshot="${SNAPSHOT_REF} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
