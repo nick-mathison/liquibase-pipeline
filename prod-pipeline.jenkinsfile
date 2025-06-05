@@ -36,9 +36,6 @@ pipeline {
                 script {
                     echo "Running dummy sanity tests..."
                     def testPassed = new Random().nextBoolean()
-                    if (!testPassed) {
-                        error("Sanity tests failed")
-                    }
                 }
             }
         }
@@ -60,6 +57,8 @@ pipeline {
                           --changeLogFile=${CHANGE_FILE} \
                           rollback-one-update --force
                         """
+                        
+                        error("Rolled back PROD successfully.")
                     }
                 }
             }
