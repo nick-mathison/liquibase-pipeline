@@ -1,0 +1,88 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/your-org/my-database-changes.git'
+        DCT_CLI = '/root/dct-toolkit'
+        LIQUIBASE_CLI = 'liquibase'
+        DB_URL = 'jdbc:postgresql://10.160.1.29:5432/delphixdb'
+        DB_USER = 'delphix'
+        DB_PASS = 'delphix'
+        CHANGE_FILE = 'my-database-changes.sql'
+        SLACK_WEBHOOK = credentials('slack-webhook')
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: "${REPO_URL}"
+            }
+        }
+
+        stage('Liquibase Update') {
+            steps {
+                sh """
+                ${LIQUIBASE_CLI} \
+                  --url=${DB_URL} \
+                  --username=${DB_USER} --password=${DB_PASS} \
+                  --changeLogFile=${CHANGE_FILE} \
+                  update
+                """
+            }
+        }
+
+        stage('Run Sanity Tests') {
+            steps {
+                script {
+                    echo "Running dummy sanity tests..."
+                    def testPassed = new Random().nextBoolean()
+                    if (!testPassed) {
+                        error("Sanity tests failed")
+                    }
+                }
+            }
+        }
+
+        stage('Conditional Snapshot or Rollback') {
+            steps {
+                script {
+                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
+                        echo "Sanity tests passed, triggering Delphix snapshot..."
+                        sh """
+                        ${DCT_CLI} take_snapshot dataset_id=Postgres_PROD
+                        """
+                    } else {
+                        echo "Sanity tests failed, performing Liquibase rollback..."
+                        sh """
+                        ${LIQUIBASE_CLI} \
+                          --url=${DB_URL} \
+                          --username=${DB_USER} --password=${DB_PASS} \
+                          --changeLogFile=${CHANGE_FILE} \
+                          rollback-one-update --force
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            script {
+                slackNotify(":white_check_mark: Production DB update *SUCCEEDED* and snapshot created for *Postgres_PROD*.")
+            }
+        }
+        failure {
+            script {
+                slackNotify(":x: Production DB update *FAILED*. Rollback attempted on *Postgres_PROD*.")
+            }
+        }
+    }
+}
+
+def slackNotify(String message) {
+    sh """
+    curl -X POST -H 'Content-type: application/json' \
+         --data '{"text": "${message}"}' ${SLACK_WEBHOOK}
+    """
+}
