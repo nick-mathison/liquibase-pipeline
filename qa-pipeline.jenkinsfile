@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        REPO_URL = 'https://github.com/your-org/my-database-changes.git'
+        REPO_URL = 'https://github.com/nick-mathison/my-database-changes.git'
         DCT_CLI = '/root/dct-toolkit' // Path to DCT CLI
         LIQUIBASE_CLI = 'liquibase'
         DB_URL = 'jdbc:postgresql://10.160.1.74:7432/delphixdb'
