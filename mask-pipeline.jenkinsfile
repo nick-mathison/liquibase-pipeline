@@ -67,7 +67,8 @@ pipeline {
         stage('Run Dummy Tests if Changes Detected') {
             when {
                 expression {
-                    return fileExists('diff.txt') && readFile('diff.txt').contains("Unexpected Column(s):")
+                    return fileExists('diff.txt') && readFile('diff.txt').contains("Unexpected Column(s):") || 
+                        fileExists('diff.txt') && readFile('diff.txt').contains("Missing Table(s):")
                 }
             }
             steps {
