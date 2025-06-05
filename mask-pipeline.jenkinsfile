@@ -9,7 +9,7 @@ pipeline {
         DB_USER = 'delphix'
         DB_PASS = 'delphix'
         CHANGE_FILE = 'my-database-changes.sql'
-        SNAPSHOT_REF = 'reference.snapshot'
+        SNAPSHOT_REF = 'prior-snapshot.json'
         SLACK_WEBHOOK = credentials('slack-webhook')
     }
 
@@ -34,7 +34,7 @@ pipeline {
                 ${LIQUIBASE_CLI} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
-                  snapshot --output-file=${SNAPSHOT_REF}
+                  snapshot --snapshot-format=JSON --output-file=${SNAPSHOT_REF}
                 """
             }
         }
