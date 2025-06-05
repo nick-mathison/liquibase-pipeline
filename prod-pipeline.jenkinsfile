@@ -46,7 +46,7 @@ pipeline {
                     if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
                         echo "Sanity tests passed, triggering Delphix snapshot..."
                         sh """
-                        ${DCT_CLI} snapshot_vdb vdb_id=Postgres_PROD
+                        ${DCT_CLI} snapshot_dsource dsource_id=Postgres_master
                         """
                     } else {
                         echo "Sanity tests failed, performing Liquibase rollback..."
