@@ -28,13 +28,13 @@ pipeline {
             }
         }
 
-        stage('Snapshot Reference') {
+        stage('Create Liquibase Snapshot') {
             steps {
                 sh """
                 ${LIQUIBASE_CLI} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
-                  snapshotReference --snapshotFormat=SERIALIZED --snapshotFile=${SNAPSHOT_REF}
+                  snapshotReference --snapshotFormat=SERIALIZED --output-file=${SNAPSHOT_REF}
                 """
             }
         }
@@ -55,10 +55,11 @@ pipeline {
             steps {
                 sh """
                 ${LIQUIBASE_CLI} \
+                  --reference-url="offline:postgres?snapshot="${SNAPSHOT_REF} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
-                  --referenceSnapshot=${SNAPSHOT_REF} \
                   diff > diff.txt || true
+                cat diff.txt
                 """
             }
         }
