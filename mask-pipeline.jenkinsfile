@@ -14,13 +14,13 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout Database Changes') {
             steps {
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
 
-        stage('Refresh VDB') {
+        stage('Refresh Postgres_MASK VDB from PROD') {
             steps {
                 sh """
                 ${DCT_CLI} refresh_vdb_by_snapshot vdb_id=Postgres_MASK
@@ -28,7 +28,7 @@ pipeline {
             }
         }
 
-        stage('Create Liquibase Snapshot') {
+        stage('Create Liquibase Snapshot from baseline state') {
             steps {
                 sh """
                 ${LB_CLI} \
@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Liquibase Update') {
+        stage('Update Postgres_MASK VDB with Liquibase') {
             steps {
                 sh """
                 ${LB_CLI} \
@@ -51,7 +51,7 @@ pipeline {
             }
         }
 
-        stage('Diff Snapshot vs Current DB') {
+        stage('Diff Schema Changes with Liquibase') {
             steps {
                 sh """
                 ${LB_CLI} \
@@ -64,7 +64,7 @@ pipeline {
             }
         }
 
-        stage('Run Dummy Tests if Changes Detected') {
+        stage('Changes? Run Tests') {
             when {
                 expression {
                     return fileExists('diff.txt') && readFile('diff.txt').contains("Unexpected Column(s):") || 

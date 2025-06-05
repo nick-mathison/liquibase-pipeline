@@ -13,13 +13,13 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout Database Changes') {
             steps {
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
 
-        stage('Liquibase Update') {
+        stage('Update PROD with Liquibase') {
             steps {
                 sh """
                 ${LB_CLI} \

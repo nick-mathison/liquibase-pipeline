@@ -13,13 +13,13 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout Database Changes') {
             steps {
                 git branch: 'main', url: "${REPO_URL}"
             }
         }
 
-        stage('Refresh VDB') {
+        stage('Refresh Postgres_QA VDB from PROD') {
             steps {
                 sh """
                 ${DCT_CLI} refresh_vdb_by_snapshot vdb_id=Postgres_QA
@@ -27,7 +27,7 @@ pipeline {
             }
         }
 
-        stage('Run Liquibase') {
+        stage('Update Postgres_QA VDB with Liquibase') {
             steps {
                 sh """
                 ${LB_CLI} \
@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Notify Slack') {
+        stage('Notify Slack of Result') {
             steps {
                 script {
                     def payload = """{
