@@ -34,7 +34,7 @@ pipeline {
                 ${LIQUIBASE_CLI} \
                   --url=${DB_URL} \
                   --username=${DB_USER} --password=${DB_PASS} \
-                  snapshotReference --snapshotFormat=SERIALIZED --output-file=${SNAPSHOT_REF}
+                  snapshot --output-file=${SNAPSHOT_REF}
                 """
             }
         }
