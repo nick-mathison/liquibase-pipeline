@@ -11,12 +11,11 @@ pipeline {
         DB_PASS = 'delphix'
         CHANGE_FILE = 'my-database-changes.sql'
         SLACK_WEBHOOK = credentials('slack-webhook')
+        TEST_PASSED = 'FALSE'
     }
     
 
     stages {
-    
-    def testPassed
 
         stage('Checkout Database Changes') {
             steps {
@@ -40,7 +39,10 @@ pipeline {
             steps {
                 script {
                     echo "Running dummy sanity tests..."
-                    testPassed = new Random().nextBoolean()
+                    def testPassed = new Random().nextBoolean()
+                    env.TEST_PASSED = testPassed
+                    echo testPassed
+                    echo ${TEST_PASSED}
                 }
             }
         }
@@ -49,7 +51,7 @@ pipeline {
             parallel {
                 stage('Create new Masked Snapshot') {
                    when {
-                        expression { return testPassed }
+                        expression { return ${TEST_PASSED}.equals("TRUE") }
                     } 
                     stages {
                         stage('Snapshot PROD') {
@@ -86,7 +88,7 @@ pipeline {
                 }
                 stage('Rollback PROD Changes') {
                    when {
-                        expression { return !testPassed }
+                        expression { return ${TEST_PASSED}.equals("FALSE") }
                     } 
                     stages {
                         stage('Rollback') {
