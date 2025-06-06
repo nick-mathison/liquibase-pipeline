@@ -11,7 +11,7 @@ pipeline {
         DB_PASS = 'delphix'
         CHANGE_FILE = 'my-database-changes.sql'
         SLACK_WEBHOOK = credentials('slack-webhook')
-        TEST_PASSED = 'false'
+        TEST_PASSED = 'something'
     }
     
 
