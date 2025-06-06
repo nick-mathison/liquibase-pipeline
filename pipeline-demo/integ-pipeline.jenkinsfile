@@ -5,7 +5,7 @@ pipeline {
         REPO_URL = 'https://github.com/nick-mathison/my-database-changes.git'
         DCT_CLI = '/root/dct-toolkit'
         LB_CLI = 'liquibase'
-        DB_URL = 'jdbc:postgresql://10.160.1.74:5444/delphixdb'
+        DB_URL = 'jdbc:postgresql://10.160.1.74:5445/delphixdb'
         DB_USER = 'delphix'
         DB_PASS = 'delphix'
         CHANGE_FILE = 'my-database-changes.sql'
@@ -20,10 +20,10 @@ pipeline {
             }
         }
 
-        stage('Refresh Postgres_MASK VDB from PROD') {
+        stage('Refresh Postgres_INTEG VDB from PROD') {
             steps {
                 sh """
-                ${DCT_CLI} refresh_vdb_by_snapshot vdb_id=Postgres_MASK
+                ${DCT_CLI} refresh_vdb_by_snapshot vdb_id=Postgres_INTEG
                 """
             }
         }
@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Update Postgres_MASK VDB with Liquibase') {
+        stage('Update Postgres_INTEG VDB with Liquibase') {
             steps {
                 sh """
                 ${LB_CLI} \
@@ -77,9 +77,9 @@ pipeline {
                     def testPassed = new Random().nextBoolean()
 
                     if (testPassed) {
-                        slackNotify(":white_check_mark: Dummy integration tests PASSED after changes to Postgres_MASK.")
+                        slackNotify(":white_check_mark: Dummy integration tests PASSED after changes to Postgres_INTEG.")
                     } else {
-                        slackNotify(":x: Dummy integration tests FAILED after changes to Postgres_MASK.")
+                        slackNotify(":x: Dummy integration tests FAILED after changes to Postgres_INTEG.")
                         error("Dummy integration test failure")
                     }
                 }
@@ -90,12 +90,12 @@ pipeline {
     post {
         success {
             script {
-                slackNotify(":white_check_mark: Pipeline SUCCEEDED for Postgres_MASK.")
+                slackNotify(":white_check_mark: Pipeline SUCCEEDED for Postgres_INTEG.")
             }
         }
         failure {
             script {
-                slackNotify(":x: Pipeline FAILED for Postgres_MASK.")
+                slackNotify(":x: Pipeline FAILED for Postgres_INTEG.")
             }
         }
     }
