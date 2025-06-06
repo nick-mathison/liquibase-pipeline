@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Refresh Postgres_INTEG VDB from PROD') {
+        stage('Refresh Postgres_INTEG VDB from MASK') {
             steps {
                 sh """
                 ${DCT_CLI} refresh_vdb_by_snapshot vdb_id=Postgres_INTEG

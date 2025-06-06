@@ -4,6 +4,7 @@ pipeline {
     environment {
         REPO_URL = 'https://github.com/nick-mathison/my-database-changes.git'
         DCT_CLI = '/root/dct-toolkit'
+        MASKING_JOB_ID= '161f50bf-9521-4129-9dd5-c0c1a99165bc'
         LB_CLI = 'liquibase'
         DB_URL = 'jdbc:postgresql://10.160.1.29:5432/delphixdb'
         DB_USER = 'delphix'
@@ -40,25 +41,55 @@ pipeline {
             }
         }
 
-        stage('Conditional Snapshot or Rollback') {
-            steps {
-                script {
-                    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
-                        echo "Sanity tests passed, triggering Delphix snapshot..."
-                        sh """
-                        ${DCT_CLI} snapshot_dsource dsource_id=Postgres_master
-                        """
-                    } else {
-                        echo "Sanity tests failed, performing Liquibase rollback..."
-                        sh """
-                        ${LB_CLI} \
-                          --url=${DB_URL} \
-                          --username=${DB_USER} --password=${DB_PASS} \
-                          --changeLogFile=${CHANGE_FILE} \
-                          rollback-one-update --force
-                        """
-                        
-                        error("Rolled back PROD successfully.")
+        stage('Conditional Create New Masked Snapshot or Rollback') {
+            parallel {
+                stage('Create new Masked Snapshot') {
+                   when {
+                        expression { return testPassed }
+                    } 
+                    stages {
+                        stage('Snapshot PROD') {
+                            echo "Sanity tests passed, triggering Delphix snapshot..."
+
+                            sh """
+                            ${DCT_CLI} snapshot_dsource dsource_id=Postgres_master
+                            """
+                        }
+                        stage('Refresh MASK VDB from PROD') {
+                            sh """
+                            ${DCT_CLI} refresh_vdb vdb_id=Postgres_MASK
+                            """
+                        }
+                        stage('Mask MASK VDB ') {
+                            sh """
+                            ${DCT_CLI} execute_masking_job masking_job_id=$MASKING_JOB_ID
+                            """
+                        }
+                        stage('Snapshot MASK VDB') {
+                            sh """
+                            ${DCT_CLI} snapshot_vdb vdb_id=Postgres_MASK
+                            """
+                        }
+                    }
+                }
+                stage('Rollback PROD Changes') {
+                   when {
+                        expression { return !testPassed }
+                    } 
+                    stages {
+                        stage('Rollback') {
+                            echo "Sanity tests failed, performing Liquibase rollback..."
+
+                            sh """
+                            ${LB_CLI} \
+                            --url=${DB_URL} \
+                            --username=${DB_USER} --password=${DB_PASS} \
+                            --changeLogFile=${CHANGE_FILE} \
+                            rollback-one-update --force
+                            """
+
+                            error("Rolled back PROD successfully.")
+                        }
                     }
                 }
             }
@@ -68,7 +99,7 @@ pipeline {
     post {
         success {
             script {
-                slackNotify(":white_check_mark: Production DB update *SUCCEEDED* and snapshot created for *Postgres_PROD*.")
+                slackNotify(":white_check_mark: Production DB update *SUCCEEDED* and *Postgres_MASK* snapshot created from *Postgres_PROD*.")
             }
         }
         failure {
