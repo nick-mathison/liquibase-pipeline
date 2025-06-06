@@ -49,7 +49,7 @@ pipeline {
             parallel {
                 stage('Create new Masked Snapshot') {
                    when {
-                        expression { return env.TEST_PASSED == 'true') }
+                        expression { return env.TEST_PASSED == 'true' }
                     } 
                     stages {
                         stage('Snapshot PROD') {
