@@ -100,7 +100,10 @@ pipeline {
                                 --changeLogFile=${CHANGE_FILE} \
                                 rollback-one-update --force
                                 """
-
+                            }
+                        }
+                        stage('Error Pipeline') {
+                            steps {
                                 error("Rolled back PROD successfully.")
                             }
                         }
