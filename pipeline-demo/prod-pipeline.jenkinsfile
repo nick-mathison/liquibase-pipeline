@@ -11,6 +11,7 @@ pipeline {
         DB_PASS = 'delphix'
         CHANGE_FILE = 'my-database-changes.sql'
         SLACK_WEBHOOK = credentials('slack-webhook')
+        def testPassed
     }
 
     stages {
@@ -36,7 +37,7 @@ pipeline {
             steps {
                 script {
                     echo "Running dummy sanity tests..."
-                    def testPassed = new Random().nextBoolean()
+                    testPassed = new Random().nextBoolean()
                 }
             }
         }
