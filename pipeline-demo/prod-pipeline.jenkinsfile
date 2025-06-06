@@ -42,6 +42,8 @@ pipeline {
                     def testPassed = new Random().nextBoolean()
                     // env.TEST_PASSED = testPassed
                     env.TEST_PASSED = 'true'
+                    echo testPassed
+                    echo "${env.TEST_PASSED}"
 
                 }
             }
