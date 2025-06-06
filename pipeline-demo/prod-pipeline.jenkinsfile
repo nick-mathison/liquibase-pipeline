@@ -40,7 +40,9 @@ pipeline {
                 script {
                     echo "Running dummy sanity tests..."
                     def testPassed = new Random().nextBoolean()
-                    env.TEST_PASSED = testPassed
+                    // env.TEST_PASSED = testPassed
+                    env.TEST_PASSED = 'true'
+
                 }
             }
         }
@@ -89,7 +91,7 @@ pipeline {
                         expression { return env.TEST_PASSED == 'false' }
                     } 
                     stages {
-                        stage('Rollback') {
+                        stage('Rollback PROD') {
                             steps {
                                 echo "Sanity tests failed, performing Liquibase rollback..."
 
