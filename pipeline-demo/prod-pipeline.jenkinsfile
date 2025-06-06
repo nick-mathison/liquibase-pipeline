@@ -11,8 +11,9 @@ pipeline {
         DB_PASS = 'delphix'
         CHANGE_FILE = 'my-database-changes.sql'
         SLACK_WEBHOOK = credentials('slack-webhook')
-        def testPassed
     }
+    
+    def testPassed
 
     stages {
         stage('Checkout Database Changes') {
