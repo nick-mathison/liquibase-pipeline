@@ -49,26 +49,34 @@ pipeline {
                     } 
                     stages {
                         stage('Snapshot PROD') {
-                            echo "Sanity tests passed, triggering Delphix snapshot..."
+                            steps {
+                                echo "Sanity tests passed, triggering Delphix snapshot..."
 
-                            sh """
-                            ${DCT_CLI} snapshot_dsource dsource_id=Postgres_master
-                            """
+                                sh """
+                                ${DCT_CLI} snapshot_dsource dsource_id=Postgres_master
+                                """
+                            }
                         }
                         stage('Refresh MASK VDB from PROD') {
-                            sh """
-                            ${DCT_CLI} refresh_vdb vdb_id=Postgres_MASK
-                            """
+                            steps {
+                                sh """
+                                ${DCT_CLI} refresh_vdb vdb_id=Postgres_MASK
+                                """
+                            }
                         }
                         stage('Mask MASK VDB ') {
-                            sh """
-                            ${DCT_CLI} execute_masking_job masking_job_id=$MASKING_JOB_ID
-                            """
+                            steps {
+                                sh """
+                                ${DCT_CLI} execute_masking_job masking_job_id=$MASKING_JOB_ID
+                                """
+                            }
                         }
                         stage('Snapshot MASK VDB') {
-                            sh """
-                            ${DCT_CLI} snapshot_vdb vdb_id=Postgres_MASK
-                            """
+                            steps {
+                                sh """
+                                ${DCT_CLI} snapshot_vdb vdb_id=Postgres_MASK
+                                """
+                            }
                         }
                     }
                 }
@@ -78,17 +86,19 @@ pipeline {
                     } 
                     stages {
                         stage('Rollback') {
-                            echo "Sanity tests failed, performing Liquibase rollback..."
+                            steps {
+                                echo "Sanity tests failed, performing Liquibase rollback..."
 
-                            sh """
-                            ${LB_CLI} \
-                            --url=${DB_URL} \
-                            --username=${DB_USER} --password=${DB_PASS} \
-                            --changeLogFile=${CHANGE_FILE} \
-                            rollback-one-update --force
-                            """
+                                sh """
+                                ${LB_CLI} \
+                                --url=${DB_URL} \
+                                --username=${DB_USER} --password=${DB_PASS} \
+                                --changeLogFile=${CHANGE_FILE} \
+                                rollback-one-update --force
+                                """
 
-                            error("Rolled back PROD successfully.")
+                                error("Rolled back PROD successfully.")
+                            }
                         }
                     }
                 }
