@@ -40,7 +40,7 @@ pipeline {
                 script {
                     echo "Running dummy sanity tests..."
                     def testPassed = new Random().nextBoolean()
-                    env.TEST_PASSED = testPassed
+                    env.TEST_PASSED = testPassed.toString()
                     echo testPassed
                     echo ${TEST_PASSED}
                 }
