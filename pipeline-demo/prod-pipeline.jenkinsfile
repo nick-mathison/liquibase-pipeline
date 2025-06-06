@@ -13,9 +13,11 @@ pipeline {
         SLACK_WEBHOOK = credentials('slack-webhook')
     }
     
-    def testPassed
 
     stages {
+    
+    def testPassed
+
         stage('Checkout Database Changes') {
             steps {
                 git branch: 'main', url: "${REPO_URL}"
