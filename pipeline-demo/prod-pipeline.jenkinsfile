@@ -49,7 +49,7 @@ pipeline {
             parallel {
                 stage('Create new Masked Snapshot') {
                    when {
-                        expression { return ${TEST_PASSED}.equals("true") }
+                        expression { return ${TEST_PASSED}.equals('true') }
                     } 
                     stages {
                         stage('Snapshot PROD') {
@@ -86,7 +86,7 @@ pipeline {
                 }
                 stage('Rollback PROD Changes') {
                    when {
-                        expression { return ${TEST_PASSED}.equals("false") }
+                        expression { return ${TEST_PASSED}.equals('false') }
                     } 
                     stages {
                         stage('Rollback') {
